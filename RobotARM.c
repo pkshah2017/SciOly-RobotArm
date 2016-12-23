@@ -23,36 +23,31 @@ float Arm2Encoder;
 const float mimicArmConvert = 40.0/24.0;
 const float Arm2Convert = 2550.0/90.0;
 float error;
-float initGrabberValue;
 float GrabberValue;
 float grabberError;
 //1 degree of rotation is 40/24 encoderTicks for arm2mimic
 //1 degree of rotation is 2550/90 encoderTicks for the arm2
 
-void getMimicValues()
-{
+void getMimicValues(){
 	Arm1MimicValue = nMotorEncoder[Mimic1]/mimicArmConvert;
 	Arm2MimicValue = -nMotorEncoder[Mimic2]/mimicArmConvert;
-	lastGrabberStatus = grabberStatus;
-	grabberStatus = SensorValue[GrabEndpoint] == 1;
 	Arm1Encoder = nMotorEncoder[Arm1];
 	Arm2Encoder = nMotorEncoder[Arm2]/Arm2Convert;
 	GrabberValue = nMotorEncoder[Grabber];
+	lastGrabberStatus = grabberStatus;
+	grabberStatus = SensorValue[GrabEndpoint] == 1;
 }
 
-void updateBasedOnMimic()
-{
+void updateBasedOnMimic(){
 	error = Arm2MimicValue - Arm2Encoder;
 	motor[Arm2] = error;
 	if(!lastGrabberStatus && grabberStatus)
 		grabberOpen = !grabberOpen;
 
 	if(grabberOpen)
-	{
 		grabberError = 10-nMotorEncoder[Grabber];
-		} else {
+	else
 		grabberError = -60 - nMotorEncoder[Grabber] ;
-	}
 
 	if(abs(grabberError) > 10)
 		motor[Grabber] = grabberError > 0 ? 50:-50;
@@ -61,8 +56,7 @@ void updateBasedOnMimic()
 
 }
 
-void updateBasedOnJoystick()
-{
+void updateBasedOnJoystick(){
 	int y1Val,y2Val;
 	getJoystickSettings(joystick);
 	y1Val = joystick.joy1_y1;
@@ -106,17 +100,18 @@ void updateBasedOnJoystick()
 	}
 }
 
-task main()
-{
+void initialize(){
 	nMotorEncoder[Mimic1] = 0;
 	nMotorEncoder[Mimic2] = 0;
 	nMotorEncoder[Arm1] = 0;
 	nMotorEncoder[Arm2] = 0;
 	nMotorEncoder[Grabber] = 0;
-	initGrabberValue = nMotorEncoder[Grabber];
 	nNoMessageCounterLimit = 150;
+}
 
-	wait10Msec(100);
+task main()
+{
+	initialize();
 	while (true)
 	{
 		getMimicValues();
