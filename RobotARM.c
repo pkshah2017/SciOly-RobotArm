@@ -1,12 +1,15 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
-#pragma config(Motor,  motorA,          Rotate,        tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  motorB,          Claw,          tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  motorC,          Flipper,       tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C1_1,     Arm1,          tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C1_2,     motorE,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_1,     Arm2,          tmotorTetrix, openLoop)
+#pragma config(Sensor, S2,     GrabEndpoint,   sensorTouch)
+#pragma config(Motor,  motorA,          Mimic1,        tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  motorB,          Mimic2,        tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  motorC,          Grabber,       tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  mtr_S1_C1_1,     Arm1,          tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,      ,             tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_1,     Arm2,          tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C2_2,     Base,          tmotorTetrix, openLoop)
+
+
 
 #include "JoystickDriver.c"
 #include "drivers/hitechnic-sensormux.h"
@@ -15,8 +18,7 @@ task main()
 {
 	nNoMessageCounterLimit = 150;
 	int y1Val,y2Val;
-	int tophatjoy1 = joystick.joy1_TopHat;
-	int tophatjoy2 = joystick.joy2_TopHat;
+
 	nMotorEncoder[Claw] = 0;
 	nMotorEncoder[Rotate] = 0;
 	nMotorEncoderTarget[Rotate] = 720;
