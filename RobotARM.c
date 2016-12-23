@@ -9,20 +9,19 @@
 #pragma config(Motor,  mtr_S1_C2_1,     Arm2,          tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C2_2,     Base,          tmotorTetrix, openLoop)
 
-
-
 #include "JoystickDriver.c"
 #include "drivers/hitechnic-sensormux.h"
+
+int Arm1MimicValue;
+int Arm2MimicValue;
+bool lastGrabberStatus;
+bool grabberStatus;
 
 task main()
 {
 	nNoMessageCounterLimit = 150;
 	int y1Val,y2Val;
 
-	nMotorEncoder[Claw] = 0;
-	nMotorEncoder[Rotate] = 0;
-	nMotorEncoderTarget[Rotate] = 720;
-	motor[Rotate] = 30;
 	wait10Msec(100);
 	while (true)
 	{
@@ -67,48 +66,13 @@ task main()
 		{
 			motor[Base] = 0;
 		}
-
-		if(joy1Btn(4))
-		{
-			nMotorEncoderTarget[Claw] = 60;
-			motor[Claw] = 30;
-			wait10Msec(100);
-		}
-		else if(joy1Btn(2))
-		{
-			nMotorEncoderTarget[Claw] = -60;
-			motor[Claw] = -30;
-			wait10Msec(100);
-		}
-		else
-		{
-			motor[Claw] = 0;
-		}
-
-		if(joy1Btn(6))
-		{
-			motor[Rotate] = 30;
-		}
-		else if(joy1Btn(5))
-		{
-			motor[Rotate] = -30;
-		}
-		else
-		{
-			motor[Rotate] = 0;
-		}
-
-		if(joy1Btn(1))
-		{
-			motor[Flipper] = 60;
-		}
-		else if(joy1Btn(3))
-		{
-			motor[Flipper] = -60;
-		}
-		else
-		{
-			motor[Flipper] = 0;
-		}
 	}
+}
+
+void getMimicValues()
+{
+	Arm1MimicValue = nMotorEncoder[Mimic1];
+	Arm2MimicValue = nMotorEncoder[Mimic2];
+	lastGrabberStatus = grabberStatus;
+	grabberStatus = SensorValue[GrabEndpoint] == 1;
 }
