@@ -13,6 +13,11 @@
 #include "JoystickDriver.c"
 #include "drivers/hitechnic-sensormux.h"
 
+bool inMimicMode = true;
+
+const float mimicArmConvert = 40.0/24.0;
+const float Arm2Convert = 2550.0/90.0;
+
 float Arm1MimicValue;
 float Arm2MimicValue;
 bool lastGrabberStatus;
@@ -20,39 +25,44 @@ bool grabberStatus;
 bool grabberOpen = true;
 float Arm1Encoder;
 float Arm2Encoder;
-const float mimicArmConvert = 40.0/24.0;
-const float Arm2Convert = 2550.0/90.0;
-float error;
-float GrabberValue;
-float grabberError;
+float GrabberEncoderValue;
+
 //1 degree of rotation is 40/24 encoderTicks for arm2mimic
 //1 degree of rotation is 2550/90 encoderTicks for the arm2
 
-void getMimicValues(){
+void getMimicValues()
+{
 	Arm1MimicValue = nMotorEncoder[Mimic1]/mimicArmConvert;
 	Arm2MimicValue = -nMotorEncoder[Mimic2]/mimicArmConvert;
 	Arm1Encoder = nMotorEncoder[Arm1];
 	Arm2Encoder = nMotorEncoder[Arm2]/Arm2Convert;
-	GrabberValue = nMotorEncoder[Grabber];
+	GrabberEncoderValue = nMotorEncoder[Grabber];
 	lastGrabberStatus = grabberStatus;
 	grabberStatus = SensorValue[GrabEndpoint] == 1;
 }
 
-void updateBasedOnMimic(){
-	error = Arm2MimicValue - Arm2Encoder;
-	motor[Arm2] = error;
+void updateGrabberPosition()
+{
 	if(!lastGrabberStatus && grabberStatus)
 		grabberOpen = !grabberOpen;
 
 	if(grabberOpen)
-		grabberError = 10-nMotorEncoder[Grabber];
+		grabberError = 10 - GrabberEncoderValue;
 	else
-		grabberError = -60 - nMotorEncoder[Grabber] ;
+		grabberError = -60 - GrabberEncoderValue ;
 
 	if(abs(grabberError) > 10)
 		motor[Grabber] = grabberError > 0 ? 50:-50;
 	else
 		motor[Grabber] = 0;
+}
+
+void updateBasedOnMimic(){
+	
+	float error = Arm2MimicValue - Arm2Encoder;
+	motor[Arm2] = error;
+
+	updateGrabberPosition();
 
 }
 
@@ -115,6 +125,9 @@ task main()
 	while (true)
 	{
 		getMimicValues();
-		updateBasedOnMimic();
+		if(inMimicMode)
+			updateBasedOnMimic();
+		else
+			updateBasedOnJoystick();
 	}
 }
