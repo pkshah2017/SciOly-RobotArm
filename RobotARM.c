@@ -58,12 +58,13 @@ void updateGrabberPosition()
 }
 
 void updateBasedOnMimic(){
-	
-	float error = Arm2MimicValue - Arm2Encoder;
-	motor[Arm2] = error;
+	float Arm2Error = Arm2MimicValue - Arm2Encoder;
+	motor[Arm2] = Arm2Error;
+
+	float Arm1Error = Arm1MimicValue - Arm1Encoder;
+	motor[Arm1] = Arm1Error;
 
 	updateGrabberPosition();
-
 }
 
 void updateBasedOnJoystick(){
@@ -72,29 +73,8 @@ void updateBasedOnJoystick(){
 	y1Val = joystick.joy1_y1;
 	y2Val = joystick.joy1_y2;
 
-	if(abs(y1Val)> 10)
-	{
-		if(y1Val > 10)
-			motor[Arm1]=(y1Val/10);
-		if(y1Val <-10)
-			motor[Arm1]=(y1Val/10);
-	}
-	else
-	{
-		motor[Arm1]=0;
-	}
-
-	if(abs(y2Val)> 10)
-	{
-		if(y2Val > 10)
-			motor[Arm2]=-(y2Val/10);
-		if(y2Val <-10)
-			motor[Arm2]=-(y2Val/10);
-	}
-	else
-	{
-		motor[Arm2]=0;
-	}
+	motor[Arm1] = abs(y1Val) > 10 ? y1Val/10 : 0;
+	motor[Arm2] = abs(y2Val) > 10 ? -y2Val/10 : 0;
 
 	if(joy1Btn(7))
 	{
