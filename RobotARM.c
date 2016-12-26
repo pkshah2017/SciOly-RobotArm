@@ -1,3 +1,5 @@
+//TODO: Implement deadzone rescaling
+
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     GrabEndpoint,   sensorTouch)
@@ -13,19 +15,22 @@
 #include "JoystickDriver.c"
 #include "drivers/hitechnic-sensormux.h"
 
-bool inMimicMode = true;
-
 const float mimicArmConvert = 40.0/24.0;
 const float Arm2Convert = 2550.0/90.0;
 
 float Arm1MimicValue;
 float Arm2MimicValue;
-bool lastGrabberStatus;
-bool grabberStatus;
-bool grabberOpen = true;
 float Arm1Encoder;
 float Arm2Encoder;
 float GrabberEncoderValue;
+
+bool lastGrabberStatus;
+bool grabberStatus;
+bool grabberOpen = true;
+
+bool lastModeSwitchStatus;
+bool modeSwitchStatus;
+bool inMimicMode = true;
 
 //1 degree of rotation is 40/24 encoderTicks for arm2mimic
 //1 degree of rotation is 2550/90 encoderTicks for the arm2
@@ -63,8 +68,6 @@ void updateBasedOnMimic(){
 
 	float Arm1Error = Arm1MimicValue - Arm1Encoder;
 	motor[Arm1] = Arm1Error;
-
-	updateGrabberPosition();
 }
 
 void updateBasedOnJoystick(){
@@ -76,20 +79,30 @@ void updateBasedOnJoystick(){
 	motor[Arm1] = abs(y1Val) > 10 ? y1Val/10 : 0;
 	motor[Arm2] = abs(y2Val) > 10 ? -y2Val/10 : 0;
 
-	if(joy1Btn(7))
-	{
-		motor[Base] = 5;
-	}
-	else if(joy1Btn(8))
-	{
-		motor[Base] = -5;
-	}
-	else
-	{
-		motor[Base] = 0;
-	}
+	lastGrabberStatus = grabberStatus;
+	grabberStatus = joy1Btn(1);
 }
 
+void updateGeneric()
+{
+	if(joy1Btn(7))
+		motor[Base] = 5;
+	else if(joy1Btn(8))
+		motor[Base] = -5;
+	else
+		motor[Base] = 0;
+
+	updateGrabberPosition();
+}
+
+void modeSwitchCheck()
+{
+	lastModeSwitchStatus = modeSwitchStatus;
+	modeSwitchStatus = joy1Btn(10);
+
+	if(!lastModeSwitchStatus && modeSwitchStatus)
+		inMimicMode = !inMimicMode;
+}
 void initialize(){
 	nMotorEncoder[Mimic1] = 0;
 	nMotorEncoder[Mimic2] = 0;
@@ -109,5 +122,7 @@ task main()
 			updateBasedOnMimic();
 		else
 			updateBasedOnJoystick();
+		updateGeneric();
+		modeSwitchCheck();
 	}
 }
