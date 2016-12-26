@@ -18,11 +18,11 @@
 const float mimicArmConvert = 40.0/24.0;
 const float Arm2Convert = 2550.0/90.0;
 
-const float reInitializeBtn = 6;
-const float baseLeftBtn = 7;
-const float baseRightBtn = 8;
-const float grabberToggleBtn = 1;
-const float modeSwitchBtn = 10;
+const int reInitializeBtn = 6;
+const int baseLeftBtn = 7;
+const int baseRightBtn = 8;
+const int grabberToggleBtn = 1;
+const int modeSwitchBtn = 10;
 
 float Arm1MimicValue;
 float Arm2MimicValue;
