@@ -96,7 +96,7 @@ void updateGeneric(){
 
 	if(joy1Btn(reInitializeBtn))
 		initialize();
-		
+
 	updateGrabberPosition();
 }
 
@@ -122,10 +122,11 @@ task main(){
 	initialize();
 	while (true)
 	{
-		getMimicValues();
 		if(inMimicMode)
+		{
+			getMimicValues();
 			updateBasedOnMimic();
-		else
+		}	else
 			updateBasedOnJoystick();
 		updateGeneric();
 		modeSwitchCheck();
