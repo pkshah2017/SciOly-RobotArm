@@ -17,6 +17,8 @@
 
 const float mimicArmConvert = 40.0/24.0;
 const float Arm2Convert = 2550.0/90.0;
+//1 degree of rotation is 40/24 encoderTicks for arm2mimic
+//1 degree of rotation is 2550/90 encoderTicks for the arm2
 
 const int reInitializeBtn = 6;
 const int baseLeftBtn = 7;
@@ -37,9 +39,6 @@ bool grabberOpen = true;
 bool lastModeSwitchStatus;
 bool modeSwitchStatus;
 bool inMimicMode = true;
-
-//1 degree of rotation is 40/24 encoderTicks for arm2mimic
-//1 degree of rotation is 2550/90 encoderTicks for the arm2
 
 void getMimicValues(){
 	Arm1MimicValue = nMotorEncoder[Mimic1]/mimicArmConvert;
@@ -96,7 +95,8 @@ void updateGeneric(){
 		motor[Base] = 0;
 
 	if(joy1Btn(reInitializeBtn))
-
+		initialize();
+		
 	updateGrabberPosition();
 }
 
@@ -105,10 +105,8 @@ void modeSwitchCheck(){
 	modeSwitchStatus = joy1Btn(modeSwitchBtn);
 
 	if(!lastModeSwitchStatus && modeSwitchStatus)
-	{
 		inMimicMode = !inMimicMode;
-		grabberStatus = false;
-	}
+
 }
 
 void initialize(){
