@@ -18,6 +18,12 @@
 const float mimicArmConvert = 40.0/24.0;
 const float Arm2Convert = 2550.0/90.0;
 
+const float reInitializeBtn = 6;
+const float baseLeftBtn = 7;
+const float baseRightBtn = 8;
+const float grabberToggleBtn = 1;
+const float modeSwitchBtn = 10;
+
 float Arm1MimicValue;
 float Arm2MimicValue;
 float Arm1Encoder;
@@ -35,8 +41,7 @@ bool inMimicMode = true;
 //1 degree of rotation is 40/24 encoderTicks for arm2mimic
 //1 degree of rotation is 2550/90 encoderTicks for the arm2
 
-void getMimicValues()
-{
+void getMimicValues(){
 	Arm1MimicValue = nMotorEncoder[Mimic1]/mimicArmConvert;
 	Arm2MimicValue = -nMotorEncoder[Mimic2]/mimicArmConvert;
 	Arm1Encoder = nMotorEncoder[Arm1];
@@ -44,22 +49,6 @@ void getMimicValues()
 	GrabberEncoderValue = nMotorEncoder[Grabber];
 	lastGrabberStatus = grabberStatus;
 	grabberStatus = SensorValue[GrabEndpoint] == 1;
-}
-
-void updateGrabberPosition()
-{
-	if(!lastGrabberStatus && grabberStatus)
-		grabberOpen = !grabberOpen;
-
-	if(grabberOpen)
-		grabberError = 10 - GrabberEncoderValue;
-	else
-		grabberError = -60 - GrabberEncoderValue ;
-
-	if(abs(grabberError) > 10)
-		motor[Grabber] = grabberError > 0 ? 50:-50;
-	else
-		motor[Grabber] = 0;
 }
 
 void updateBasedOnMimic(){
@@ -80,29 +69,48 @@ void updateBasedOnJoystick(){
 	motor[Arm2] = abs(y2Val) > 10 ? -y2Val/10 : 0;
 
 	lastGrabberStatus = grabberStatus;
-	grabberStatus = joy1Btn(1);
+	grabberStatus = joy1Btn(grabberToggleBtn);
 }
 
-void updateGeneric()
-{
-	if(joy1Btn(7))
+void updateGrabberPosition(){
+	if(!lastGrabberStatus && grabberStatus)
+		grabberOpen = !grabberOpen;
+
+	if(grabberOpen)
+		grabberError = 10 - GrabberEncoderValue;
+	else
+		grabberError = -60 - GrabberEncoderValue ;
+
+	if(abs(grabberError) > 10)
+		motor[Grabber] = grabberError > 0 ? 50:-50;
+	else
+		motor[Grabber] = 0;
+}
+
+void updateGeneric(){
+	if(joy1Btn(baseLeftBtn))
 		motor[Base] = 5;
-	else if(joy1Btn(8))
+	else if(joy1Btn(baseRightBtn))
 		motor[Base] = -5;
 	else
 		motor[Base] = 0;
 
+	if(joy1Btn(reInitializeBtn))
+
 	updateGrabberPosition();
 }
 
-void modeSwitchCheck()
-{
+void modeSwitchCheck(){
 	lastModeSwitchStatus = modeSwitchStatus;
-	modeSwitchStatus = joy1Btn(10);
+	modeSwitchStatus = joy1Btn(modeSwitchBtn);
 
 	if(!lastModeSwitchStatus && modeSwitchStatus)
+	{
 		inMimicMode = !inMimicMode;
+		grabberStatus = false;
+	}
 }
+
 void initialize(){
 	nMotorEncoder[Mimic1] = 0;
 	nMotorEncoder[Mimic2] = 0;
@@ -112,8 +120,7 @@ void initialize(){
 	nNoMessageCounterLimit = 150;
 }
 
-task main()
-{
+task main(){
 	initialize();
 	while (true)
 	{
